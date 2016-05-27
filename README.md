@@ -55,7 +55,9 @@ template(name="ls_json"
            constant(value="\"}\n")
          }
 
-*.* @127.0.0.1:5514;ls_json```
+*.* @127.0.0.1:5514;ls_json
+```
+
 The configuration above need to be placed inside the ``/etc/rsyslog.d/90-logstash.conf`` on **syslog.01.example.org** and **syslog.o2.example.org** in our example and rsyslog need to be restarted (``service rsyslog restart``).
 
 
@@ -99,7 +101,8 @@ output {
         ssl => true         # over unsecure network do not use plain!
         verify_ssl => true  # we assume that you have a valid certificate!
       }
-	}```
+	}
+```
 
 ## consume messages with graylog
 Now the Data need to be consumed by graylog. Create an [input](http://docs.graylog.org/en/2.0/pages/getting_started/config_input.html) with the Input *Syslog AMQP*. Add the Information that is configured in the former steps (exchange, username and password, hostname). Set the Option *Allow overwrite date*.
