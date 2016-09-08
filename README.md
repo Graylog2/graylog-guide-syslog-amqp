@@ -1,25 +1,25 @@
-# Sending syslog via AMQP into Graylog
+# Sending Syslog via AMQP into Graylog
 
-If your setup does not allow direct communication from all hosts to the Graylog Server or your Graylog Server is located inside a private Network you could use AMQP as Transport. You will need to have a AMQP Server like rabbitMQ reachable by all Hosts. But it's easy to secure this communication if transport is over insecure wire. For get more Information please read [the rabbitMQ SSL Guide](https://www.rabbitmq.com/ssl.html).
+If your setup does not allow direct communication from all hosts to the Graylog Server or your Graylog Server is located inside a private Network you could use AMQP as Transport. You will need to have an AMQP Server like rabbitMQ reachable by all Hosts. But it's easy to secure this communication if transport is over an insecure wire. Forget more Information please read [the rabbitMQ SSL Guide](https://www.rabbitmq.com/ssl.html).
 
 ```
 This Guide will not give you a complete copy&paste how-to,
-but it will guide you and give additional information.
+but it will guide you and provide additional information.
 
 Please do not follow the steps if you did not know how to deal
 with common issues yourself.   
 ```
 
 
-In this scenario a syslog message will have the following stages:
+In this scenario a Syslog message will have the following stages:
 
-- transformed into json by [rsyslog](http://www.rsyslog.com)
-- send from rsyslog to [logstash](https://www.elastic.co/products/logstash) via tcp/udp
+- transformed into JSON by [rsyslog](http://www.rsyslog.com)
+- send from rsyslog to [logstash](https://www.elastic.co/products/logstash) via TCP/UDP
 - send from logstash to [rabbitMQ](https://www.rabbitmq.com)
 - consumed by graylog from rabbitMQ
-- syslog extracted from json by Graylog
+- Syslog extracted from JSON by Graylog
 
-We will assume that you have a rabbitMQ running on **amqp.ext.example.org (203.0.113.2)** and your Graylog Instance is running on **graylog.int.example.org (192.168.0.10)**. Additional we have the Linux System **syslog.o1.example.org (198.51.100.1)** and **syslog.o2.example.org (192.0.2.1)** that will send syslog Data. All Systems running *ubuntu* so you might need to adjust some configuration path settings.
+We will assume that you have a rabbitMQ running on **amqp.ext.example.org (203.0.113.2)** and your Graylog Instance is running on **graylog.int.example.org (192.168.0.10)**. Additional we have the Linux System **syslog.o1.example.org (198.51.100.1)** and **syslog.o2.example.org (192.0.2.1)** that will send Syslog Data. All Systems are running *ubuntu* so you might need to adjust some configuration path settings.
 
 ## prepare rabbitMQ
 If no AMQP Broker is present, [install rabbitMQ](https://www.rabbitmq.com/install-debian.html) on **amqp.ext.example.org** and create a user for log delivery on CLI.
@@ -29,14 +29,14 @@ rabbitmqctl add_user my_rabbite_mq_user_here my_super_secure_password_rabbit_mq_
 rabbitmqctl set_permissions -p / my_rabbite_mq_user_here ".*" ".*" ".*"
 ```
 
-If this Server is available *in the wild* please [enable SSL](http://www.gettingcirrius.com/2013/01/configuring-ssl-for-rabbitmq.html) in your Setup. A Management GUI can be [installed with a few commands](https://www.rabbitmq.com/management.html) and a [admin User is created ](http://stackoverflow.com/questions/22850546/cant-access-rabbitmq-web-management-interface-after-fresh-install) similar to the User creation above. Check [this Post](http://www.gettingcirrius.com/2013/01/rabbitmq-configuration-and-management.html) how you can secure your rabbitMQ Setup.  
+If this Server is available *in the wild* please [enable SSL](http://www.gettingcirrius.com/2013/01/configuring-ssl-for-rabbitmq.html) in your Setup. A Management GUI can be [installed with a few commands](https://www.rabbitmq.com/management.html) and an [admin User is Created ](http://stackoverflow.com/questions/22850546/cant-access-rabbitmq-web-management-interface-after-fresh-install) similar to the User creation above. Check [this Post](http://www.gettingcirrius.com/2013/01/rabbitmq-configuration-and-management.html) how you can secure your rabbitMQ Setup.  
 
 ## send messages on rsyslog
-With rsyslog you can use templates to format how messages should look like. Formatting the messages direct at the source will help to have a clean message from the source to the destination.
+With rsyslog, you can use templates to format how messages should look like. Formatting the messages direct at the source will help to have a clean message from the source to the destination.
 
 To identify the messages with the Full Qualified Domain Name of the System that has created the message we use the Option ``PreserveFQDN`` - but you will need to have a clean working hostname resolution.
 
-rsyslog will send the message via udp to the local running logstash.
+rsyslog will send the message via UDP to the local running logstash.
 
 ```
 PreserveFQDN on
@@ -62,18 +62,18 @@ The configuration above need to be placed inside the ``/etc/rsyslog.d/90-logstas
 
 
 ## route messages with logstash
-As of writing this, rsyslog was not able to send messages direct to AMQP on Ubuntu so we need to use logstash for the transport.
+As of writing this, rsyslog was not able to send messages direct to AMQP on Ubuntu, so we need to use logstash for the transport.
 
-Logstash will listen on *localhost* port *udp/5514* for the messsages that are coming from rsyslog and forward them to the rabbitMQ Server.
+Logstash will listen on *localhost* port *udp/5514* for the messages that are coming from rsyslog and forward them to the rabbitMQ Server.
 
 ```
 input {
-	udp {
-		port => 5514
-		host => "127.0.0.1"
-		type => syslog
-		codec => "json"
-		}
+    UDP {
+        port => 5514
+        host => "127.0.0.1"
+        type => syslog
+        codec => "json"
+        }
 }
 
 filter {
@@ -87,29 +87,29 @@ filter {
 }
 
 output {
-	rabbitmq {
+    rabbitmq {
       exchange => "log-messages"
-    	exchange_type => "fanout"
-    	key => "log-messages"
-    	host => "amqp.ext.example.org"
-    	workers => 1         # if you have alot of messages raise this slowly
-    	durable => true
-    	persistent => true
-    	port => 5672
-    	user => "my_rabbite_mq_user_here"
-    	password => "my_super_secure_password_rabbit_mq_password"
+        exchange_type => "fanout"
+        key => "log-messages"
+        host => "amqp.ext.example.org"
+        workers => 1         # if you have alot of messages raise this slowly
+        durable => true
+        persistent => true
+        port => 5672
+        user => "my_rabbite_mq_user_here"
+        password => "my_super_secure_password_rabbit_mq_password"
         ssl => true         # over unsecure network do not use plain!
         verify_ssl => true  # we assume that you have a valid certificate!
       }
-	}
+    }
 ```
 
 ## consume messages with graylog
-Now the Data need to be consumed by graylog. Create an [input](http://docs.graylog.org/en/2.0/pages/getting_started/config_input.html) with the Input *Syslog AMQP*. Add the Information that is configured in the former steps (exchange, username and password, hostname). Set the Option *Allow overwrite date*.
+Now the Data need to be consumed by graylog. Create an [input](http://docs.graylog.org/en/2.0/pages/getting_started/config_input.html) with the Input *Syslog AMQP*. Add the Information that is configured in the former steps (exchange, username, password, hostname). Set the Option *Allow overwrite date*.
 
-Start the Input to consume the first messages and create [a json extractor](http://docs.graylog.org/en/2.0/pages/extractors.html#using-the-json-extractor). Additional create a second extractor on the field `host` and the type `copy input` and store it in the field `source`. You might want a third `copy input` to store `@timestamp` in `timestamp`.
+Start the Input to consume the first messages and create [a JSON extractor](http://docs.graylog.org/en/2.0/pages/extractors.html#using-the-json-extractor). Additional create a second extractor on the field `host` and the type `copy input` and store it in the field `source`. You might want a third `copy input` to store `@timestamp` in `timestamp`.
 
-## whats next?
+## what's next?
 Use the *rsyslog* Systems as Syslog Proxies for every possible source in the same network, add more systems to your setup.
 
 
