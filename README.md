@@ -101,13 +101,11 @@ output {
         exchange_type => "fanout"
         key => "log-messages"
         host => "amqp.ext.example.org"
-        workers => 1         # if you have alot of messages raise this slowly
         durable => true
         persistent => true
         port => 5672
         user => "my_rabbite_mq_user_here"
         password => "my_super_secure_password_rabbit_mq_password"
-        ssl => true         # over unsecure network do not use plain!
         verify_ssl => true  # we assume that you have a valid certificate!
       }
     }
