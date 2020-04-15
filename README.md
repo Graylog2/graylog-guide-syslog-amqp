@@ -48,7 +48,7 @@ To identify the messages with the Full Qualified Domain Name of the System that 
 rsyslog will send the message via UDP to the local running logstash.
 
 ```
-PreserveFQDN on
+$PreserveFQDN on
 template(name="ls_json"
          type="list"
          option.json="on") {
