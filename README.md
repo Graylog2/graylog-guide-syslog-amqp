@@ -29,7 +29,16 @@ rabbitmqctl add_user my_rabbite_mq_user_here my_super_secure_password_rabbit_mq_
 rabbitmqctl set_permissions -p / my_rabbite_mq_user_here ".*" ".*" ".*"
 ```
 
-If this Server is available *in the wild* please [enable SSL](http://www.gettingcirrius.com/2013/01/configuring-ssl-for-rabbitmq.html) in your Setup. A Management GUI can be [installed with a few commands](https://www.rabbitmq.com/management.html) and an [admin User is Created ](http://stackoverflow.com/questions/22850546/cant-access-rabbitmq-web-management-interface-after-fresh-install) similar to the User creation above. Check [this Post](http://www.gettingcirrius.com/2013/01/rabbitmq-configuration-and-management.html) how you can secure your rabbitMQ Setup.  
+If this Server is available *in the wild* please enable SSL  in your Setup. A Management GUI can be [installed with a few commands](https://www.rabbitmq.com/management.html) and an [admin User is Created ](http://stackoverflow.com/questions/22850546/cant-access-rabbitmq-web-management-interface-after-fresh-install) similar to the User creation above.
+```
+listeners.ssl.1 = 5671                  # this is the secure port for rabbitmq
+#ssl_options.verify               = verify_peer
+#ssl_options.fail_if_no_peer_cert = true
+ssl_options.cacertfile           = /path/ssl/ca.crt
+ssl_options.certfile             = /path/ssl/ssl/yourserver.crt
+ssl_options.keyfile              = /path/ssl/yourserver.key
+```
+
 
 ## send messages on rsyslog
 With rsyslog, you can use templates to format how messages should look like. Formatting the messages direct at the source will help to have a clean message from the source to the destination.
@@ -39,7 +48,7 @@ To identify the messages with the Full Qualified Domain Name of the System that 
 rsyslog will send the message via UDP to the local running logstash.
 
 ```
-PreserveFQDN on
+$PreserveFQDN on
 template(name="ls_json"
          type="list"
          option.json="on") {
@@ -92,13 +101,11 @@ output {
         exchange_type => "fanout"
         key => "log-messages"
         host => "amqp.ext.example.org"
-        workers => 1         # if you have alot of messages raise this slowly
         durable => true
         persistent => true
         port => 5672
         user => "my_rabbite_mq_user_here"
         password => "my_super_secure_password_rabbit_mq_password"
-        ssl => true         # over unsecure network do not use plain!
         verify_ssl => true  # we assume that you have a valid certificate!
       }
     }
@@ -116,5 +123,4 @@ Use the *rsyslog* Systems as Syslog Proxies for every possible source in the sam
 # Credits
 - untergeek for [rsyslog / json template](https://gist.github.com/untergeek/0373ee85a41d03ae1b78) and the [blogpost](http://untergeek.com/2012/10/11/using-rsyslog-to-send-pre-formatted-json-to-logstash/)
 - IETF for [documentation ips](https://tools.ietf.org/html/rfc5737)
-- Richard [for SSL on rabbitMQ Blogpost](http://www.gettingcirrius.com/2013/01/configuring-ssl-for-rabbitmq.html)
 - StackOverflow User Gabriele for the answer [how to create User on CLI](http://stackoverflow.com/questions/22850546/cant-access-rabbitmq-web-management-interface-after-fresh-install)
