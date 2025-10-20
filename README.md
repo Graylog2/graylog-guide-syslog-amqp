@@ -1,3 +1,7 @@
+# This guide has been archived.
+The information in this guide is very old and likely no longer applicable to current versions of Graylog. 
+Please take that into account when reading the following content.
+
 # Sending Syslog via AMQP into Graylog
 
 If your setup does not allow direct communication from all hosts to the Graylog Server or your Graylog Server is located inside a private Network you could use AMQP as Transport. You will need to have an AMQP Server like rabbitMQ reachable by all Hosts. But it's easy to secure this communication if transport is over an insecure wire. Forget more Information please read [the rabbitMQ SSL Guide](https://www.rabbitmq.com/ssl.html).
